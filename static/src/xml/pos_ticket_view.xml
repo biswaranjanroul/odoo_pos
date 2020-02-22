@@ -1,0 +1,403 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="point_of_sale.template" xml:space="preserve">
+    <t t-extend="Chrome">
+        <t t-jquery='.pos-branding' t-operation='replace'>
+             <img src='/web/binary/company_logo' style="width: 3%;padding: 2px 8px 0px 13px;float: left;"/>
+             <span class="placeholder-UsernameWidget" style="float: left;padding-top: 19px;color: #fff;"></span>
+        </t>
+    </t>
+
+    <t t-extend="OrderReceipt">
+        <t t-jquery='.pos-receipt' t-operation='replace'>
+            <div class="pos-receipt" style="font-size: 10px;">
+                <div>
+                    <div style="width: 55%; float: left;font-size: 10px;">
+                        <br/>
+                        <t t-if="widget.pos.company.name">
+                            <div style="width:100%;text-align:left;font-weight:bold"><t t-esc="widget.pos.company.name"/></div>
+                        </t>
+                        <div>
+                            <t t-if="widget.pos.config.name">
+                                <div style="width:100%;text-align:left;"><t t-esc="widget.pos.config.name"/></div>
+                            </t>
+                            <t t-if="widget.pos.config.streets">
+                                <div style="width:100%;text-align:left;"><t t-esc="widget.pos.config.streets"/></div>
+                            </t>
+                            <t t-if="widget.pos.config.streets2">
+                                <div style="width:100%;text-align:left;"><t t-esc="widget.pos.config.streets2"/></div>
+                            </t>
+                            <t t-if="widget.pos.config.citys">
+                                <div style="width:100%;text-align:left;"><t t-esc="widget.pos.config.citys"/> -
+                                    <t t-esc="widget.pos.config.zips"/>
+                            </div>
+                            </t>
+                        </div>
+
+
+<!--                         <t t-if="widget.pos.company.street">
+                            <div style="width:100%;text-align:left;font-weight:bold"><t t-esc="widget.pos.company.street"/></div>
+                        </t>
+                        <t t-if="widget.pos.company.street2">
+                            <span style="width:100%;text-align:left;font-weight:bold">
+                                <t t-esc="widget.pos.company.street2"/>
+                                <t t-esc="widget.pos.company.city"/> -
+                                <t t-esc="widget.pos.company.zip"/><br/>
+                            </span>
+                        </t>
+ -->                        <t t-if="widget.pos.company.phone">
+                            <div style="width:100%;text-align:left;">Ph :<t t-esc="widget.pos.company.phone"/></div>
+                        </t>
+                        <t t-if="widget.pos.company.vat">
+                            <div style="width:100%;text-align:left;"><tr>GSTIN:</tr><t t-esc="widget.pos.company.vat"/></div>
+                        </t>
+                        <t t-if="widget.pos.company.email">
+                            <div style="width:100%;text-align:left;"><t t-esc="widget.pos.company.email"/></div>
+                        </t>
+                        <t t-if="widget.pos.company.website">
+                            <div style="width:100%;text-align:left;"><t t-esc="widget.pos.company.website"/></div>
+                        </t><br/>
+                     </div>
+
+                    <div style="width: 45%;float: right; ">
+                        <div style="text-align:right;font-size:8px;">(CUSTOMER COPY)</div>
+                        <img src='/web/binary/company_logo' style="width:100%"/>
+                        <br/>
+                    </div>
+
+                    <table width="100%">
+                        <tr>
+                            <td style="text-align: center;border-bottom:1px solid black;font-weight:bold;">GST BILL</td>
+                        </tr>
+                    </table>
+
+                    <div style="width: 50%; float: left;">
+                        Invoice No : <t t-esc="order.name"/><br/>
+                        User Id : <t t-esc="widget.pos.cashier ? widget.pos.cashier.name : widget.pos.user.name"/><br/>
+                        Customer: <t t-esc="order.get_client().name"/><br />
+                        GST : <t t-if="order.get_client().vat">
+                                <t t-esc="order.get_client().vat"/></t>
+                        <br/><br />
+                    </div>
+
+                    <div style="width: 50%;float: right;">
+                        Date : <t t-esc="moment().format('L')" t-options='{"format": "dd-MM-y"}'/><br />
+                        Time : <t t-esc="moment().format('LT')" t-options='{"format": "H-M-S"}'/><br/>
+                        Sales Person : <br/>
+                        <br/><br />
+                    </div>
+                </div>
+
+                <t t-if="receipt.header">
+                    <div style='text-align:center'>
+                        <t t-esc="receipt.header" />
+                    </div>
+                    <br/>
+                </t>
+
+                <table class='receipt-orderlines' width="100%">
+                    <tr>
+                        <th width='30%'>Name</th>
+                        <th width='10%'>Qty</th>
+                        <th width='15%'>Price</th>
+                        <th width='20%'>Value</th>
+                        <th width='25%'>GST</th>
+                    </tr>
+
+                    <tr t-foreach="orderlines" t-as="orderline">
+                        <td style="text-align:left">
+                            <t t-esc="orderline.get_product().display_name"/>
+                        </td>
+
+                        <td style="text-align:center">
+                            <t t-esc="orderline.get_quantity_str_with_unit()"/>
+                        </td>
+
+                        <td style="text-align:center">
+                            <t t-set="a" t-value="orderline.quantityStr"></t>
+                            <t t-set="b" t-value="orderline.get_display_price()"></t>
+                            <t t-set="c" t-value="b/a"></t>
+                            <t t-esc="c"/>
+                        </td>
+
+                        <td style="text-align:center">
+                            <t t-esc="widget.format_currency(orderline.get_display_price())"/>
+                        </td>
+
+                        <td style="text-align:center">
+                            <t t-foreach="order.get_tax_details()" t-as="taxdetail">
+                                <t t-esc="taxdetail.name" />
+                            </t>
+                        </td>
+                    </tr>
+                    <br />
+                </table>
+
+                <br /><br />
+
+                <table width="100%">
+                    <tr>
+                        <td width="30%"></td>
+                        <td><b>Subtotal</b></td>
+                        <td>
+                            <t t-esc="widget.format_currency(order.get_total_without_tax())"/>
+                        </td>
+                    </tr>
+
+                    <t t-foreach="order.get_tax_details()" t-as="taxdetail">
+                        <tr>
+                            <td width="30%"></td>
+                            <td><t t-esc="taxdetail.name" /></td>
+                            <td>
+                                <t t-esc="widget.format_currency(taxdetail.amount)"/>
+                            </td>
+                        </tr>
+                    </t>
+
+                    <tr>
+                        <td width="30%"></td>
+                        <td>Discount:</td>
+                        <td>
+                            <t t-esc="widget.format_currency(order.get_total_discount())"/>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td width="30%"></td>
+                        <td><b>Total</b></td>
+                        <td>
+                            <t t-esc="widget.format_currency(order.get_total_with_tax())"/>
+                        </td>
+                    </tr>
+                </table>
+
+                <br/>
+
+                <table width="100%">
+                    <tr>
+                        <td width="30%"></td>
+                        <td>
+                            <t t-foreach="paymentlines" t-as="line">
+                                <b><t t-esc="line.name"/></b>
+                            </t>
+                        </td>
+                        <td>
+                            <t t-foreach="paymentlines" t-as="line">
+                                <t t-esc="widget.format_currency(line.get_amount())"/>
+                            </t>
+                        </td>
+                    </tr>
+                    
+
+                    <tr>
+                        <td width="30%"></td>
+                        <td><b>Change</b></td>
+                        <td>
+                            <t t-esc="widget.format_currency(order.get_change())"/>
+                        </td>
+                    </tr>
+                </table>
+
+                <br/>
+
+                <div>
+                    <t><center>For Terms &amp; Conditions Of Sale PTO</center></t>
+                </div>
+            </div>
+
+
+            <div class="pos-receipt" style="font-size: 10px;">
+                <div>
+                    <div style="width: 55%; float: left;font-size: 10px;">
+                        <br/>
+                        <t t-if="widget.pos.company.name">
+                            <div style="width:100%;text-align:left;font-weight:bold"><t t-esc="widget.pos.company.name"/></div>
+                        </t>
+                        <div>
+                            <t t-if="widget.pos.config.name">
+                                <div style="width:100%;text-align:left;"><t t-esc="widget.pos.config.name"/></div>
+                            </t>
+                            <t t-if="widget.pos.config.streets">
+                                <div style="width:100%;text-align:left;"><t t-esc="widget.pos.config.streets"/></div>
+                            </t>
+                            <t t-if="widget.pos.config.streets2">
+                                <div style="width:100%;text-align:left;"><t t-esc="widget.pos.config.streets2"/></div>
+                            </t>
+                            <t t-if="widget.pos.config.citys">
+                                <div style="width:100%;text-align:left;"><t t-esc="widget.pos.config.citys"/> -
+                                    <t t-esc="widget.pos.config.zips"/>
+                            </div>
+                            </t>
+                        </div>
+
+<!--                         <t t-if="widget.pos.company.street">
+                            <div style="width:100%;text-align:left;font-weight:bold"><t t-esc="widget.pos.company.street"/></div>
+                        </t>
+                        <t t-if="widget.pos.company.street2">
+                            <span style="width:100%;text-align:left;font-weight:bold">
+                                <t t-esc="widget.pos.company.street2"/>
+                                <t t-esc="widget.pos.company.city"/> -
+                                <t t-esc="widget.pos.company.zip"/><br/>
+                            </span>
+                        </t>
+ -->                        <t t-if="widget.pos.company.phone">
+                            <div style="width:100%;text-align:left;">Ph :<t t-esc="widget.pos.company.phone"/></div>
+                        </t>
+                        <t t-if="widget.pos.company.vat">
+                            <div style="width:100%;text-align:left;"><tr>GSTIN:</tr><t t-esc="widget.pos.company.vat"/></div>
+                        </t>
+                        <t t-if="widget.pos.company.email">
+                            <div style="width:100%;text-align:left;"><t t-esc="widget.pos.company.email"/></div>
+                        </t>
+                        <t t-if="widget.pos.company.website">
+                            <div style="width:100%;text-align:left;"><t t-esc="widget.pos.company.website"/></div>
+                        </t><br/>
+                     </div>
+
+                    <div style="width: 45%;float: right; ">
+                        <div style="text-align:right;font-size:8px;">(STORE COPY)</div>
+                        <img src='/web/binary/company_logo' style="width:100%"/>
+                        <br/>
+                    </div>
+
+                    <table width="100%">
+                        <tr>
+                            <td style="text-align: center;border-bottom:1px solid black;font-weight:bold;">GST BILL</td>
+                        </tr>
+                    </table>
+
+                    <div style="width: 50%; float: left;">
+                        Invoice No : <t t-esc="order.name"/><br/>
+                        User Id : <t t-esc="widget.pos.cashier ? widget.pos.cashier.name : widget.pos.user.name"/><br/>
+                        Customer: <t t-esc="order.get_client().name"/><br />
+                        GST : <t t-if="order.get_client().vat">
+                                <t t-esc="order.get_client().vat"/></t>
+                        <br/><br />
+                    </div>
+
+                    <div style="width: 50%;float: right;">
+                        Date : <t t-esc="moment().format('L')" t-options='{"format": "dd-MM-y"}'/><br />
+                        Time : <t t-esc="moment().format('LT')" t-options='{"format": "H-M-S"}'/><br/>
+                        Sales Person : <br/>
+                        <br/><br />
+                    </div>
+                </div>
+
+                <t t-if="receipt.header">
+                    <div style='text-align:center'>
+                        <t t-esc="receipt.header" />
+                    </div>
+                    <br/>
+                </t>
+
+                <table class='receipt-orderlines' width="100%">
+                    <tr>
+                        <th width='30%'>Name</th>
+                        <th width='10%'>Qty</th>
+                        <th width='15%'>Price</th>
+                        <th width='20%'>Value</th>
+                        <th width='25%'>GST</th>
+                    </tr>
+
+                    <tr t-foreach="orderlines" t-as="orderline">
+                        <td style="text-align:left">
+                            <t t-esc="orderline.get_product().display_name"/>
+                        </td>
+
+                        <td style="text-align:center">
+                            <t t-esc="orderline.get_quantity_str_with_unit()"/>
+                        </td>
+
+                        <td style="text-align:center">
+                            <t t-set="a" t-value="orderline.quantityStr"></t>
+                            <t t-set="b" t-value="orderline.get_display_price()"></t>
+                            <t t-set="c" t-value="b/a"></t>
+                            <span t-esc="c"/>
+                        </td>
+
+                        <td style="text-align:center">
+                            <t t-esc="widget.format_currency(orderline.get_display_price())"/>
+                        </td>
+
+                        <td style="text-align:center">
+                            <t t-foreach="order.get_tax_details()" t-as="taxdetail">
+                                <t t-esc="taxdetail.name" />
+                            </t>
+                        </td>
+                    </tr>
+                    <br />
+                </table>
+
+                <br /><br />
+
+                <table width="100%">
+                    <tr>
+                        <td width="30%"></td>
+                        <td><b>Subtotal</b></td>
+                        <td>
+                            <t t-esc="widget.format_currency(order.get_total_without_tax())"/>
+                        </td>
+                    </tr>
+
+                    <t t-foreach="order.get_tax_details()" t-as="taxdetail">
+                        <tr>
+                            <td width="30%"></td>
+                            <td><t t-esc="taxdetail.name" /></td>
+                            <td>
+                                <t t-esc="widget.format_currency(taxdetail.amount)"/>
+                            </td>
+                        </tr>
+                    </t>
+
+                    <tr>
+                        <td width="30%"></td>
+                        <td>Discount:</td>
+                        <td>
+                            <t t-esc="widget.format_currency(order.get_total_discount())"/>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td width="30%"></td>
+                        <td><b>Total</b></td>
+                        <td>
+                            <t t-esc="widget.format_currency(order.get_total_with_tax())"/>
+                        </td>
+                    </tr>
+                </table>
+
+                <br/>
+
+                <table width="100%">
+                    <tr>
+                        <td width="30%"></td>
+                        <td>
+                            <t t-foreach="paymentlines" t-as="line">
+                                <b><t t-esc="line.name"/></b>
+                            </t>
+                        </td>
+                        <td>
+                            <t t-foreach="paymentlines" t-as="line">
+                                <t t-esc="widget.format_currency(line.get_amount())"/>
+                            </t>
+                        </td>
+                    </tr>
+                    
+
+                    <tr>
+                        <td width="30%"></td>
+                        <td><b>Change</b></td>
+                        <td>
+                            <t t-esc="widget.format_currency(order.get_change())"/>
+                        </td>
+                    </tr>
+                </table>
+
+                <br/>
+
+                <div>
+                    <t><center>For Terms &amp; Conditions Of Sale PTO</center></t>
+                </div>
+            </div>
+        </t>
+    </t>
+</templates>
